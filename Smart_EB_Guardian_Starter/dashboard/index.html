@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart EB Guardian | Energy Analytics</title>
+<style>
+:root{--navy:#14253d;--blue:#2e6de6;--bg:#f4f7fb;--ink:#1d2a3b;--muted:#718096;--line:#e6ebf2;--green:#188765;--amber:#c27b12}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+.top{background:var(--navy);color:white;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:21px;font-weight:700}.brand span{color:#7db1ff}.sub{font-size:12px;color:#c6d3e4;margin-top:5px}
+.badge{background:#e4f6ed;color:#17694e;border-radius:20px;padding:8px 12px;font-size:12px;font-weight:bold}
+.wrap{max-width:1200px;margin:24px auto;padding:0 22px}.head{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}
+h1{font-size:25px;margin:0 0 6px}.muted{color:var(--muted);font-size:13px}.demo{font-size:11px;background:#fff4d9;color:#815800;border:1px solid #f2d998;padding:7px 10px;border-radius:7px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:16px}.card{background:white;border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:0 3px 12px #1b35530a}
+.label{font-size:12px;color:var(--muted);margin-bottom:12px}.value{font-size:26px;font-weight:700;letter-spacing:-.5px}.delta{font-size:11px;color:var(--green);margin-top:9px}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}.card h2{font-size:15px;margin:0 0 4px}.cardhead{display:flex;justify-content:space-between;align-items:start;margin-bottom:18px}
+.pill{font-size:11px;background:#eef4ff;color:#2e6de6;border-radius:20px;padding:6px 9px}
+.chart{width:100%;height:220px;display:block}.legend{font-size:11px;color:var(--muted);display:flex;gap:14px;margin-top:7px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.floorrow{display:grid;grid-template-columns:70px 1fr 50px;align-items:center;gap:10px;margin:18px 0;font-size:12px}.bar{height:10px;background:#edf1f7;border-radius:20px;overflow:hidden}.fill{height:100%;background:#3f80f5;border-radius:20px}
+.forecast{display:flex;gap:20px;align-items:center}.ring{width:88px;height:88px;border-radius:50%;border:9px solid #dce8ff;border-top-color:#2e6de6;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#2e6de6}
+.forecast strong{font-size:22px;display:block;margin:6px 0}.range{font-size:12px;color:var(--muted);line-height:1.7}
+table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;color:var(--muted);font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}td{padding:12px 8px;border-bottom:1px solid #f0f2f6}.alert{background:#fff1e8;color:#b64c17;padding:5px 8px;border-radius:6px;font-weight:bold;font-size:10px}
+.chatbox{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px;font-size:13px;line-height:1.55}.question{background:#e9f1ff;padding:10px 12px;border-radius:9px;margin-bottom:9px;color:#244d92}.answer{padding:4px 2px}.chatrow{display:flex;gap:8px;margin-top:12px}.chatrow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:7px;padding:10px}.chatrow button{border:0;background:var(--blue);color:white;border-radius:7px;padding:10px 14px;font-weight:bold;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:20px}
+@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.head{display:block}.demo{display:inline-block;margin-top:12px}}
+</style>
+</head>
+<body>
+<header class="top"><div><div class="brand">⚡ Smart <span>EB Guardian</span></div><div class="sub">Serverless electricity analytics · bill forecasting · anomaly monitoring</div></div><div class="badge">● Prototype dashboard</div></header>
+<main class="wrap">
+<div class="head"><div><h1>Energy overview</h1><div class="muted">Residential building · 4 floors + common-area usage</div></div><div class="demo">DEMO DATA — synthetic readings, not live EB data</div></div>
+<section class="kpis">
+<div class="card"><div class="label">Total consumption · 30 days</div><div class="value" id="total">6,840 <small style="font-size:13px">kWh</small></div><div class="delta">↗ Usage summary</div></div>
+<div class="card"><div class="label">Estimated next-month bill</div><div class="value" id="bill">₹51,300</div><div class="delta">Based on sample ₹7.50/kWh tariff</div></div>
+<div class="card"><div class="label">Daily average</div><div class="value" id="average">228 <small style="font-size:13px">kWh</small></div><div class="delta">Calculated from demo readings</div></div>
+<div class="card"><div class="label">Anomaly alerts</div><div class="value" id="alerts">2</div><div class="delta" style="color:var(--amber)">Review unusual usage</div></div>
+</section>
+<section class="grid">
+<div class="card"><div class="cardhead"><div><h2>Daily consumption trend</h2><div class="muted">Last 30 days · total building kWh</div></div><span class="pill">30 days</span></div>
+<svg class="chart" viewBox="0 0 600 230" role="img" aria-label="Daily consumption line chart">
+<g stroke="#e9edf4" stroke-width="1"><line x1="42" y1="30" x2="580" y2="30"/><line x1="42" y1="75" x2="580" y2="75"/><line x1="42" y1="120" x2="580" y2="120"/><line x1="42" y1="165" x2="580" y2="165"/><line x1="42" y1="205" x2="580" y2="205"/></g>
+<g fill="#8491a5" font-size="10"><text x="5" y="34">300</text><text x="5" y="79">250</text><text x="5" y="124">200</text><text x="5" y="169">150</text><text x="42" y="223">Sep 1</text><text x="210" y="223">Sep 10</text><text x="380" y="223">Sep 20</text><text x="535" y="223">Sep 30</text></g>
+<path d="M42 122 L60 108 L78 131 L96 116 L114 94 L132 111 L150 124 L168 98 L186 52 L204 116 L222 132 L240 119 L258 108 L276 127 L294 99 L312 115 L330 130 L348 109 L366 94 L384 51 L402 112 L420 124 L438 102 L456 117 L474 135 L492 105 L510 122 L528 97 L546 114 L564 108 L580 116 L580 205 L42 205 Z" fill="#dce8ff" opacity=".8"/>
+<polyline points="42,122 60,108 78,131 96,116 114,94 132,111 150,124 168,98 186,52 204,116 222,132 240,119 258,108 276,127 294,99 312,115 330,130 348,109 366,94 384,51 402,112 420,124 438,102 456,117 474,135 492,105 510,122 528,97 546,114 564,108 580,116" fill="none" stroke="#2e6de6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="186" cy="52" r="5" fill="#d97706"/><circle cx="384" cy="51" r="5" fill="#d97706"/>
+</svg><div class="legend"><span><i class="dot" style="background:#2e6de6"></i>Consumption</span><span><i class="dot" style="background:#d97706"></i>Unusual peaks</span></div></div>
+<div class="card"><div class="cardhead"><div><h2>Consumption by floor</h2><div class="muted">Demo-period total</div></div><span class="pill">kWh</span></div>
+<div class="floorrow"><span>Floor 1</span><div class="bar"><div class="fill" style="width:74%"></div></div><b>1,310</b></div>
+<div class="floorrow"><span>Floor 2</span><div class="bar"><div class="fill" style="width:82%"></div></div><b>1,470</b></div>
+<div class="floorrow"><span>Floor 3</span><div class="bar"><div class="fill" style="width:67%"></div></div><b>1,190</b></div>
+<div class="floorrow"><span>Floor 4</span><div class="bar"><div class="fill" style="width:100%;background:#e9a23b"></div></div><b>1,790</b></div>
+<div class="floorrow"><span>Common</span><div class="bar"><div class="fill" style="width:43%;background:#7c8da8"></div></div><b>770</b></div>
+<div style="border-top:1px solid var(--line);padding-top:13px;margin-top:20px"><div class="muted">Highest usage</div><strong style="display:block;margin-top:5px">Floor 4</strong><div class="muted" style="margin-top:5px">Review air-conditioning and overnight loads.</div></div>
+</div>
+</section>
+<section class="grid">
+<div class="card"><div class="cardhead"><div><h2>Bill forecast</h2><div class="muted">Next 30-day estimate based on recent average</div></div><span class="pill">Forecast</span></div>
+<div class="forecast"><div class="ring">30D</div><div><div class="muted">Estimated bill</div><strong id="bill2">₹51,300</strong><div class="range">Estimated range: ₹46,170 – ₹56,430<br>Sample tariff: ₹7.50 per kWh</div></div></div>
+<p class="muted" style="margin-top:18px">This is a simple prototype estimate. Actual EB bills depend on tariff slabs, taxes, fixed charges and meter readings.</p>
+</div>
+<div class="card"><div class="cardhead"><div><h2>Recent anomaly alerts</h2><div class="muted">Potential unusual consumption</div></div><span class="pill">Needs review</span></div>
+<table><thead><tr><th>Date</th><th>Area</th><th>Possible cause</th><th>Status</th></tr></thead><tbody>
+<tr><td>Sep 09</td><td>Floor 4</td><td>Unusually high usage</td><td><span class="alert">ALERT</span></td></tr>
+<tr><td>Sep 20</td><td>Floor 4</td><td>Possible AC left running</td><td><span class="alert">ALERT</span></td></tr>
+<tr><td>Sep 24</td><td>Common</td><td>Monitor next reading</td><td><span style="color:#188765;font-weight:bold">OK</span></td></tr>
+</tbody></table>
+</div>
+</section>
+<section class="card"><div class="cardhead"><div><h2>GenAI assistant (demo)</h2><div class="muted">Example of a grounded response style; this local demo is not connected to an LLM or AWS Bedrock.</div></div><span class="pill">Q&A preview</span></div>
+<div class="chatbox"><div class="question"><b>You:</b> Why did my bill increase?</div><div class="answer"><b>Smart EB Guardian:</b> In this sample, Floor 4 shows higher consumption on Sep 9 and Sep 20. Check whether air-conditioning or other high-power appliances were operating longer than usual. This is a possible explanation based on the demo readings, not a confirmed cause.</div><div id="chatlog"></div>
+<div class="chatrow"><input id="question" placeholder="Ask about the sample electricity data..." aria-label="Question"><button onclick="ask()">Ask</button></div></div></section>
+</main><footer>Smart EB Guardian · Local prototype · Synthetic sample data · Not connected to live meters or AWS services</footer>
+<script>
+function ask(){let q=document.getElementById('question').value.trim();if(!q)return;let log=document.getElementById('chatlog');let item=document.createElement('div');item.className='chatbox';let answer='The sample dashboard shows higher usage on a few days. Review the daily trend and anomaly list. This demo answer is rule-based and is not generated by a live RAG model.';if(q.toLowerCase().includes('bill'))answer='The bill estimate is based on recent average daily consumption multiplied by 30 days and the sample tariff of ₹7.50/kWh. Actual tariff slabs and charges may change the final EB bill.';else if(q.toLowerCase().includes('floor'))answer='Floor 4 has the highest demo-period consumption in this dashboard. Consider checking air-conditioning and other high-power appliances.';else if(q.toLowerCase().includes('anomal')||q.toLowerCase().includes('high'))answer='The demo flags unusual peaks on Sep 9 and Sep 20. These are alerts to investigate, not proof of a fault.';item.innerHTML='<b>You:</b> '+q.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'<br><b>Assistant:</b> '+answer;log.appendChild(item);document.getElementById('question').value='';}
+</script>
+
+<script>
+async function loadElectricityAnalysis() {
+  const apiUrl =
+    "https://6dfsr4szpk.execute-api.us-east-1.amazonaws.com/prod/analysis";
+
+  try {
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error("API error: " + response.status);
+    }
+
+    const result = await response.json();
+
+    // Support both Lambda proxy and direct JSON responses
+    const data = typeof result.body === "string"
+      ? JSON.parse(result.body)
+      : (result.body || result);
+
+    // Update the dashboard using the actual API field names
+    const total = Number(data.total_consumption_kwh ?? 0);
+    const average = Number(
+      data.average_daily_kwh ?? data.average_consumption_kwh ?? 0
+    );
+    const alertCount = Array.isArray(data.anomaly_alerts)
+      ? data.anomaly_alerts.length
+      : Number(data.flagged_anomaly_count ?? 0);
+
+    document.getElementById("total").innerHTML =
+      total.toLocaleString(undefined, {maximumFractionDigits: 2}) +
+      ' <small style="font-size:13px">kWh</small>';
+
+    document.getElementById("average").innerHTML =
+      average.toLocaleString(undefined, {maximumFractionDigits: 2}) +
+      ' <small style="font-size:13px">kWh</small>';
+
+    document.getElementById("alerts").textContent = alertCount;
+
+    const bill = Number(
+      data.estimated_bill_inr ??
+      (total * Number(data.tariff_inr_per_kwh ?? 7.5))
+    );
+
+    document.getElementById("bill").textContent =
+      "₹" + bill.toLocaleString(undefined, {maximumFractionDigits: 2});
+
+    document.getElementById("bill2").textContent =
+      "₹" + bill.toLocaleString(undefined, {maximumFractionDigits: 2});
+
+    // Show confirmation and useful API details
+    let output = document.getElementById("aws-analysis-results");
+
+    if (!output) {
+      output = document.createElement("section");
+      output.id = "aws-analysis-results";
+      output.className = "card";
+      output.style.margin = "20px 0";
+      document.querySelector("main").appendChild(output);
+    }
+
+    output.innerHTML = `
+      <h2>AWS Electricity Analysis</h2>
+      <p>Connection: Connected</p>
+      <p>Total consumption: ${total.toFixed(2)} kWh</p>
+      <p>Average daily consumption: ${average.toFixed(2)} kWh</p>
+      <p>Estimated bill: ₹${bill.toFixed(2)}</p>
+      <p>Anomaly alerts: ${alertCount}</p>
+      <p>Data source: ${data.demo_data ? "Synthetic demo data" : "AWS analysis"}</p>
+    `;
+
+    // Update the dashboard's demo label
+    const demoLabel = document.querySelector(".demo");
+    if (demoLabel) {
+      demoLabel.textContent = data.demo_data
+        ? "DEMO DATA — synthetic readings"
+        : "AWS DATA — analysis loaded";
+    }
+
+    console.log("AWS analysis loaded:", data);
+
+  } catch (error) {
+    console.error("AWS connection failed:", error);
+
+    let output = document.getElementById("aws-analysis-results");
+
+    if (!output) {
+      output = document.createElement("section");
+      output.id = "aws-analysis-results";
+      output.className = "card";
+      document.querySelector("main").appendChild(output);
+    }
+
+    output.textContent =
+      "Could not load AWS data: " + error.message +
+      ". Check the browser Console (F12) for details.";
+  }
+}
+
+loadElectricityAnalysis();
+</script>
+</body>
+</html>

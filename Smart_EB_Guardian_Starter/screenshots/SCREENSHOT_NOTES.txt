@@ -1,0 +1,1 @@
+The PNGs are illustrative local prototype screenshots made for report UI placeholders. They are not captured from AWS Console and do not prove AWS deployment. Replace with genuine screenshots after testing actual AWS resources.
